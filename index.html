@@ -1,0 +1,3292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北京市水质监测数据看板</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .filter-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .filter-group {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .filter-group label {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .table-container {
+            overflow-x: auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+        .type-河流 { background: #e3f2fd; }
+        .type-湖泊 { background: #f3e5f5; }
+        .type-水库 { background: #e8f5e9; }
+        .quality-Ⅰ { background: #4caf50; color: white; font-weight: bold; }
+        .quality-Ⅱ { background: #8bc34a; color: white; }
+        .quality-Ⅲ { background: #ffeb3b; }
+        .quality-Ⅳ { background: #ff9800; }
+        .quality-Ⅴ { background: #f44336; color: white; }
+        .quality-劣Ⅴ { background: #9c27b0; color: white; }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 北京市水质监测数据看板</h1>
+            <p>数据来源：北京市生态环境局 | 更新时间：2026-07-07 16:59</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value">139</div>
+                <div class="stat-label">监测断面总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">104</div>
+                <div class="stat-label">河流断面</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">17</div>
+                <div class="stat-label">湖泊</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">18</div>
+                <div class="stat-label">水库</div>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-group">
+                <label>水体类型：</label>
+                <select id="typeFilter" onchange="filterTable()">
+                    <option value="all">全部</option>
+                    <option value="河流">河流</option>
+                    <option value="湖泊">湖泊</option>
+                    <option value="水库">水库</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>所在区：</label>
+                <select id="districtFilter" onchange="filterTable()">
+                    <option value="all">全部</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>水体类型</th>
+                        <th>所在区</th>
+                        <th>监测断面/水体名称</th>
+                        <th>2026-05</th>
+                        <th>2026-04</th>
+                        <th>2026-03</th>
+                        <th>2026-02</th>
+                        <th>2026-01</th>
+                        <th>2025-12</th>
+                        <th>2025-11</th>
+                        <th>2025-10</th>
+                        <th>2025-09</th>
+                        <th>2025-08</th>
+                        <th>2025-07</th>
+                        <th>2025-06</th>
+                        <th>2025-05</th>
+                        <th>2025-04</th>
+                        <th>2025-03</th>
+                        <th>2025-02</th>
+                        <th>2025-01</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>北台上水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>十三陵水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>半城子水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>大宁水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>大水峪水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">施工无法监测</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>官厅水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>密云水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>崇青水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>怀柔水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>斋堂水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>桃峪口水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">施工无法监测</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>沙厂水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>海子水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>珠窝水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>白河堡水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>西峪水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>遥桥峪水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">施工无法监测</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-水库">
+                        <td>水库</td>
+                        <td>-</td>
+                        <td>黄松峪水库</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>丁家洼河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀</td>
+                        <td>万泉河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平</td>
+                        <td>东沙河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>东沙河（大清河水系）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-劣Ⅴ">劣Ⅴ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台</td>
+                        <td>丰草河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>二道沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">施工无法监测</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云、怀柔、顺义、昌平、海淀</td>
+                        <td>京密引水渠</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>东城、朝阳</td>
+                        <td>亮马河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平</td>
+                        <td>关沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">结冰</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台</td>
+                        <td>凉水河上段（万泉寺-大红门）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台、朝阳、大兴、亦庄、通州</td>
+                        <td>凉水河中下段（大红门-榆林庄）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>大兴、亦庄</td>
+                        <td>凤河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>大兴、亦庄、通州</td>
+                        <td>凤港减河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>刺猬河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-劣Ⅴ">劣Ⅴ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>北小河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>东城、西城</td>
+                        <td>北护城河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平、海淀</td>
+                        <td>北沙河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>通州</td>
+                        <td>北运河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>半壁店明渠</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>东城、西城</td>
+                        <td>南护城河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平、海淀</td>
+                        <td>南沙河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆</td>
+                        <td>古城河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>周口店河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀、朝阳</td>
+                        <td>土城沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>坝河上段（东直门-驼房营）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>坝河下段（驼房营-温榆河）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义</td>
+                        <td>城北减河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>大柳树明沟</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>大石河上段（堂上-漫水河）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>大石河下段（漫水河-祖村）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>大兴</td>
+                        <td>大龙河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔</td>
+                        <td>天河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>夹括河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆</td>
+                        <td>妫水河上段（黄龙潭-京张公路桥）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆</td>
+                        <td>妫水河下段（京张公路桥-官厅水库）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>安达木河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>将军关石河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义、通州</td>
+                        <td>小中河</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀</td>
+                        <td>小月河</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>小清河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台、大兴</td>
+                        <td>小龙河（北运河水系）</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>大兴</td>
+                        <td>小龙河（永定河水系）</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-劣Ⅴ">劣Ⅴ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔</td>
+                        <td>怀九河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔</td>
+                        <td>怀沙河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义、怀柔</td>
+                        <td>怀河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>拒马河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>大兴、亦庄、通州</td>
+                        <td>新凤河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆</td>
+                        <td>新华营河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>石景山</td>
+                        <td>新开渠</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀</td>
+                        <td>昆玉河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平</td>
+                        <td>桃峪口沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>大兴</td>
+                        <td>永兴河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>门头沟</td>
+                        <td>永定河山峡段（官厅坝下-三家店）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>石景山、丰台、房山、大兴</td>
+                        <td>永定河平原段（三家店-崔指挥营）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>石景山、海淀</td>
+                        <td>永引上段（三家店-罗道庄）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀、西城</td>
+                        <td>永引下段（罗道庄-广安门）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔</td>
+                        <td>汤河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔、密云</td>
+                        <td>沙河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>泃河上段（罗汉石-平谷东关）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>泃河下段（平谷东关-市界）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>泃河库上段</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>洳河上段（银野岭-岳各庄）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>洳河下段（岳各庄-泃河）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>门头沟</td>
+                        <td>清水河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>清水河（潮白河水系）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>门头沟</td>
+                        <td>清水涧</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀</td>
+                        <td>清河上段（安河闸-清河桥）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平、朝阳</td>
+                        <td>清河下段（清河桥-沙子营）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆、怀柔</td>
+                        <td>渣汰沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平、顺义</td>
+                        <td>温榆河上段（沙河水库-沙子营）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义、朝阳、通州</td>
+                        <td>温榆河下段（沙子营-北关闸）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>通州</td>
+                        <td>港沟河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>潮河上段（古北口-密云水库）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>潮河下段（潮河主坝-河槽）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云、怀柔、顺义</td>
+                        <td>潮白河上段（河槽-向阳闸）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义、通州</td>
+                        <td>潮白河下段（向阳闸-牛牧屯）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>牤牛河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>通州</td>
+                        <td>玉带河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔</td>
+                        <td>琉璃河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆、怀柔、密云</td>
+                        <td>白河上段（白河堡水库-密云水库）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>白河下段（白河主坝-河槽）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>白马关河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义</td>
+                        <td>箭杆河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>密云</td>
+                        <td>红门川河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>石景山、西城、丰台</td>
+                        <td>莲花河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳、通州</td>
+                        <td>萧太后河</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>昌平</td>
+                        <td>蔺沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳、亦庄、通州</td>
+                        <td>西排干</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>观音堂明沟</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>通州</td>
+                        <td>运潮减河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳、亦庄、通州</td>
+                        <td>通惠北干渠</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳</td>
+                        <td>通惠河上段（东便门-高碑店闸）</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>朝阳、通州</td>
+                        <td>通惠河下段（高碑店闸-通济桥）</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>顺义、平谷</td>
+                        <td>金鸡河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>镇罗营石河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>海淀、西城</td>
+                        <td>长河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台</td>
+                        <td>长辛店明沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>怀柔</td>
+                        <td>雁栖河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>房山</td>
+                        <td>马刨泉河</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台</td>
+                        <td>马草河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>石景山</td>
+                        <td>高井沟</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>丰台</td>
+                        <td>黄土岗灌渠</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="quality-劣Ⅴ">劣Ⅴ</td>
+                        <td class="quality-劣Ⅴ">劣Ⅴ</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                        <td class="">无水</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>平谷</td>
+                        <td>黄松峪石河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-河流">
+                        <td>河流</td>
+                        <td>延庆</td>
+                        <td>黑河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>海淀</td>
+                        <td>八一湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>西城</td>
+                        <td>六海</td>
+                        <td class="">Ⅱ～Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">Ⅱ～Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">Ⅱ～Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">Ⅱ～Ⅲ</td>
+                        <td class="">Ⅱ～Ⅲ</td>
+                        <td class="">Ⅱ～Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>海淀</td>
+                        <td>团城湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>海淀</td>
+                        <td>圆明园湖</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>朝阳</td>
+                        <td>奥运湖</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>西城</td>
+                        <td>展览馆后湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>海淀</td>
+                        <td>昆明湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>朝阳</td>
+                        <td>朝阳公园湖</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>东城</td>
+                        <td>柳荫公园湖</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅴ">Ⅴ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>海淀</td>
+                        <td>玉渊潭湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>东城、西城</td>
+                        <td>筒子河</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>海淀</td>
+                        <td>紫竹院湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>朝阳</td>
+                        <td>红领巾湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>丰台</td>
+                        <td>莲花池</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>西城</td>
+                        <td>陶然亭湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="">结冰</td>
+                        <td class="">结冰</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>东城</td>
+                        <td>青年湖</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                    </tr>
+                    <tr class="type-湖泊">
+                        <td>湖泊</td>
+                        <td>东城</td>
+                        <td>龙潭湖</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅱ">Ⅱ</td>
+                        <td class="quality-Ⅲ">Ⅲ</td>
+                        <td class="quality-Ⅳ">Ⅳ</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>数据来源：北京市生态环境局 | 水质标准：地表水环境质量标准（GB 3838-2002）</p>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化区域筛选器
+        const districts = new Set();
+        document.querySelectorAll('#dataTable tbody tr').forEach(row => {
+            const district = row.cells[1].textContent.trim();
+            if (district && district !== '-') {
+                districts.add(district);
+            }
+        });
+        
+        const districtFilter = document.getElementById('districtFilter');
+        Array.from(districts).sort().forEach(district => {
+            const option = document.createElement('option');
+            option.value = district;
+            option.textContent = district;
+            districtFilter.appendChild(option);
+        });
+        
+        function filterTable() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const districtFilter = document.getElementById('districtFilter').value;
+            
+            document.querySelectorAll('#dataTable tbody tr').forEach(row => {
+                const type = row.cells[0].textContent.trim();
+                const district = row.cells[1].textContent.trim();
+                
+                const typeMatch = typeFilter === 'all' || type === typeFilter;
+                const districtMatch = districtFilter === 'all' || district === districtFilter;
+                
+                row.style.display = typeMatch && districtMatch ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
