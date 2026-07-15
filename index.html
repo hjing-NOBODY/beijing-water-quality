@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>北京市水质监测数据看板</title>
+    <script>
+    (function(){
+        var ua=navigator.userAgent.toLowerCase();
+        if(ua.indexOf('micromessenger')!==-1){
+            document.addEventListener('DOMContentLoaded',function(){
+                var overlay=document.createElement('div');
+                overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:-apple-system,sans-serif;text-align:center;padding:20px;box-sizing:border-box;';
+                overlay.innerHTML='<div style="font-size:48px;margin-bottom:20px;">👆</div><div style="font-size:20px;font-weight:bold;margin-bottom:12px;">点击右上角「···」菜单</div><div style="font-size:16px;color:#ccc;line-height:1.8;">选择「在浏览器打开」<br>即可查看完整交互式看板</div><div style="margin-top:30px;padding:10px 24px;background:rgba(255,255,255,0.15);border-radius:8px;font-size:14px;color:#aaa;cursor:pointer;" onclick="this.parentElement.style.display=\'none\'">我知道了，先看看数据 ↓</div>';
+                document.body.appendChild(overlay);
+            });
+        }
+    })();
+    </script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
