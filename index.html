@@ -129,6 +129,7 @@
             font-size: 12px;
         }
     </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -171,6 +172,9 @@
                 <select id="districtFilter" onchange="filterTable()">
                     <option value="all">全部</option>
                 </select>
+            </div>
+            <div class="filter-group" style="float:right;">
+                <button onclick="exportToExcel()" style="padding:8px 18px;background:#667eea;color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:600;">📥 导出Excel</button>
             </div>
         </div>
         
@@ -3299,6 +3303,44 @@
                 
                 row.style.display = typeMatch && districtMatch ? '' : 'none';
             });
+        }
+        
+        function exportToExcel() {
+            const table = document.getElementById('dataTable');
+            const headers = [];
+            const headerCells = table.querySelectorAll('thead th');
+            headerCells.forEach(th => headers.push(th.textContent.trim()));
+            
+            const data = [];
+            table.querySelectorAll('tbody tr').forEach(row => {
+                if (row.style.display === 'none') return; // 跳过被筛选隐藏的行
+                const rowData = [];
+                row.querySelectorAll('td').forEach(td => {
+                    // 提取纯文本内容（水质等级，去掉"施工无法监测""结冰"等特殊状态的样式）
+                    rowData.push(td.textContent.trim());
+                });
+                data.push(rowData);
+            });
+            
+            // 构建工作表
+            const wsData = [headers, ...data];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // 设置列宽
+            ws['!cols'] = headers.map((h, i) => {
+                if (i <= 2) return { wch: 16 }; // 水体类型、所在区、名称
+                return { wch: 10 }; // 月份列
+            });
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '水质数据');
+            
+            // 生成文件名，带当前日期
+            const now = new Date();
+            const dateStr = now.getFullYear() + '' + 
+                String(now.getMonth()+1).padStart(2,'0') + '' + 
+                String(now.getDate()).padStart(2,'0');
+            XLSX.writeFile(wb, '北京市水质数据_' + dateStr + '.xlsx');
         }
     </script>
 </body>
